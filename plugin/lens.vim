@@ -77,7 +77,7 @@ endif
 
 if ! exists('g:lens#disable_for_diff')
   " Disable for the following filenames
-  let g:lens#disable_for_diff = 0
+  let g:lens#disable_for_diff = 1
 endif
 
 
@@ -162,6 +162,11 @@ function! lens#win_enter() abort
     if ! g:lens#resize_floating && nvim_win_get_config(0)['relative'] != ''
       return
     endif
+  endif
+
+  " Don't reize popup windows
+  if exists('*win_gettype') && win_gettype(winnr()) == 'popup'
+    return
   endif
 
   if g:lens#disabled || g:lens#enter_disabled
