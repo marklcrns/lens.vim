@@ -203,12 +203,15 @@ endfunction
 " By default set up running resize on window enter except for new windows
 augroup lens
   let g:lens#enter_disabled = 0
+  " WinNew is used to disable the resize on new windows since some ignored
+  " filetypes still auto resized initially
   autocmd! WinNew * let g:lens#enter_disabled = 1
-  autocmd! WinClosed * let g:lens#enter_disabled = 1
-  autocmd! WinLeave * let g:lens#enter_disabled = 0
-  autocmd! WinEnter * call lens#win_enter()
+  autocmd! WinLeave,BufLeave * let g:lens#enter_disabled = 0
+  autocmd! WinEnter,BufEnter * call lens#win_enter()
   autocmd! FocusGained * call lens#win_enter()
   autocmd! VimResized * call lens#win_enter()
+  " For less confusion and fix animation issues
+  autocmd! WinClosed * let g:lens#enter_disabled = 1
 augroup END
 
 " vim:fdm=marker
