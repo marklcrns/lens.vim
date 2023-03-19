@@ -15,6 +15,7 @@ if exists('g:lens#loaded')
 endif
 
 let g:lens#loaded = 1
+let golden_ratio = 1.618
 
 if ! exists('g:lens#disabled')
   " Global disable
@@ -33,22 +34,30 @@ endif
 
 if ! exists('g:lens#height_resize_max')
   " When resizing don't go beyond the following height
-  let g:lens#height_resize_max = 20
+  let g:lens#height_resize_max = float2nr((&lines / golden_ratio))
 endif
 
 if ! exists('g:lens#height_resize_min')
   " When resizing don't go below the following height
-  let g:lens#height_resize_min = 5
+  let g:lens#height_resize_min = float2nr(
+    \ (&lines / golden_ratio) / ( 3 * golden_ratio)
+  \)
 endif
 
 if ! exists('g:lens#width_resize_max')
   " When resizing don't go beyond the following width
-  let g:lens#width_resize_max = 80
+  let g:lens#width_resize_max = float2nr((&columns / golden_ratio))
 endif
 
 if ! exists('g:lens#width_resize_min')
   " When resizing don't go below the following width
-  let g:lens#width_resize_min = 20
+  let g:lens#width_resize_min = float2nr(
+    \ (&columns / golden_ratio) / ( 3 * golden_ratio)
+  \)
+endif
+
+if ! exists("g:lens#target_width_padding")
+  let g:lens#target_width_padding = 5
 endif
 
 if ! exists('g:lens#disabled_filetypes')
@@ -114,7 +123,10 @@ endfunction
 ""
 " Gets the target width
 function! lens#get_target_width() abort
-  return lens#get_cols() + (wincol() - virtcol('.'))
+  return lens#get_cols()
+    \ + (wincol()
+    \ - virtcol('.'))
+    \ + g:lens#target_width_padding
 endfunction
 
 ""
@@ -187,8 +199,11 @@ endfunction
 augroup lens
   let g:lens#enter_disabled = 0
   autocmd! WinNew * let g:lens#enter_disabled = 1
+  autocmd! WinClosed * let g:lens#enter_disabled = 1
+  autocmd! WinLeave * let g:lens#enter_disabled = 0
   autocmd! WinEnter * call lens#win_enter()
-  autocmd! WinNew * let g:lens#enter_disabled = 0
+  autocmd! FocusGained * call lens#win_enter()
+  autocmd! VimResized * call lens#win_enter()
 augroup END
 
 " vim:fdm=marker
